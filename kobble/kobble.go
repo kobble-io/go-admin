@@ -18,7 +18,7 @@ type Kobble struct {
 	Auth     *auth.KobbleAuth
 }
 
-func NewKobble(secret string, options Options) *Kobble {
+func New(secret string, options Options) *Kobble {
 	baseURL := DefaultBaseUrl
 	if options.BaseApiUrl != nil {
 		baseURL = *options.BaseApiUrl
