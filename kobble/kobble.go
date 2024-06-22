@@ -32,7 +32,10 @@ func New(secret string, options Options) *Kobble {
 		Gateway:  gateway.NewKobbleGateway(gateway.Config{Http: http}),
 		Users:    users.NewKobbleUsers(users.Config{Http: http}),
 		Webhooks: webhooks.NewKobbleWebhooks(),
-		Auth:     auth.NewKobbleAuth(http),
+		Auth: auth.NewKobbleAuth(auth.Config{
+			Http:    http,
+			BaseURL: baseURL,
+		}),
 	}
 }
 

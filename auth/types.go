@@ -1,22 +1,13 @@
 package auth
 
 import (
-	"github.com/golang-jwt/jwt/v5"
+	"fmt"
 	"github.com/valensto/kobble-go-sdk/utils"
 )
 
 import (
 	"time"
 )
-
-type VerifyAccessTokenOptions struct {
-	ApplicationID *string `json:"application_id,omitempty"`
-	Issuer        *string `json:"issuer,omitempty"`
-}
-
-type VerifyIdTokenOptions struct {
-	ApplicationID *string `json:"application_id,omitempty"`
-}
 
 type VerifyAccessTokenResult struct {
 	UserID    string                      `json:"user_id"`
@@ -25,14 +16,14 @@ type VerifyAccessTokenResult struct {
 }
 
 type IdTokenUser struct {
-	ID         string    `json:"id"`
-	Email      *string   `json:"email"`
-	Name       *string   `json:"name"`
-	PictureURL *string   `json:"picture_url"`
-	IsVerified bool      `json:"is_verified"`
-	StripeID   *string   `json:"stripe_id"`
-	UpdatedAt  time.Time `json:"updated_at"`
-	CreatedAt  time.Time `json:"created_at"`
+	ID         string `json:"id"`
+	Email      string `json:"email"`
+	Name       string `json:"name"`
+	PictureURL string `json:"picture_url"`
+	IsVerified bool   `json:"is_verified"`
+	StripeID   string `json:"stripe_id"`
+	UpdatedAt  string `json:"updated_at"`
+	CreatedAt  string `json:"created_at"`
 }
 
 type VerifyIdTokenResult struct {
@@ -42,8 +33,8 @@ type VerifyIdTokenResult struct {
 }
 
 type Config struct {
-	http    *utils.HttpClient
-	baseURL string
+	Http    *utils.HttpClient
+	BaseURL string
 }
 
 type Whoami struct {
@@ -57,39 +48,38 @@ type ProjectCache struct {
 }
 
 type RawIdTokenPayloadClaims struct {
-	Sub        string  `json:"sub"`
-	ID         string  `json:"id"`
-	Email      *string `json:"email"`
-	Name       *string `json:"name"`
-	PictureURL *string `json:"picture_url"`
-	IsVerified bool    `json:"is_verified"`
-	StripeID   *string `json:"stripe_id"`
-	UpdatedAt  string  `json:"updated_at"`
-	CreatedAt  string  `json:"created_at"`
+	Sub        string `json:"sub"`
+	ID         string `json:"id"`
+	Email      string `json:"email"`
+	Name       string `json:"name"`
+	PictureURL string `json:"picture_url"`
+	IsVerified bool   `json:"is_verified"`
+	StripeID   string `json:"stripe_id"`
+	UpdatedAt  string `json:"updated_at"`
+	CreatedAt  string `json:"created_at"`
+	Exp        int64  `json:"exp"`
+	Iat        int64  `json:"iat"`
+	Nbf        int64  `json:"nbf"`
+	Iss        string `json:"iss"`
+	Aud        string `json:"aud"`
 }
 
-func (r RawIdTokenPayloadClaims) GetExpirationTime() (*jwt.NumericDate, error) {
-	return nil, nil
-}
+func (r RawIdTokenPayloadClaims) Valid() error {
+	now := time.Now().Unix()
 
-func (r RawIdTokenPayloadClaims) GetIssuedAt() (*jwt.NumericDate, error) {
-	return nil, nil
-}
+	if r.Exp != 0 && now > r.Exp {
+		return fmt.Errorf("token is expired")
+	}
 
-func (r RawIdTokenPayloadClaims) GetNotBefore() (*jwt.NumericDate, error) {
-	return nil, nil
-}
+	if r.Nbf != 0 && now < r.Nbf {
+		return fmt.Errorf("token is not valid yet")
+	}
 
-func (r RawIdTokenPayloadClaims) GetIssuer() (string, error) {
-	return "", nil
-}
+	if r.Iat != 0 && now < r.Iat {
+		return fmt.Errorf("token used before issued")
+	}
 
-func (r RawIdTokenPayloadClaims) GetSubject() (string, error) {
-	return r.Sub, nil
-}
-
-func (r RawIdTokenPayloadClaims) GetAudience() (jwt.ClaimStrings, error) {
-	return jwt.ClaimStrings{}, nil
+	return nil
 }
 
 type RawAccessTokenPayloadClaims struct {
@@ -102,26 +92,20 @@ type RawAccessTokenPayloadClaims struct {
 	Aud       string `json:"aud"`
 }
 
-func (r RawAccessTokenPayloadClaims) GetExpirationTime() (*jwt.NumericDate, error) {
-	return jwt.NewNumericDate(time.Unix(r.Exp, 0)), nil
-}
+func (r RawAccessTokenPayloadClaims) Valid() error {
+	now := time.Now().Unix()
 
-func (r RawAccessTokenPayloadClaims) GetIssuedAt() (*jwt.NumericDate, error) {
-	return jwt.NewNumericDate(time.Unix(r.Iat, 0)), nil
-}
+	if r.Exp != 0 && now > r.Exp {
+		return fmt.Errorf("token is expired")
+	}
 
-func (r RawAccessTokenPayloadClaims) GetNotBefore() (*jwt.NumericDate, error) {
-	return jwt.NewNumericDate(time.Unix(r.Nbf, 0)), nil
-}
+	if r.Nbf != 0 && now < r.Nbf {
+		return fmt.Errorf("token is not valid yet")
+	}
 
-func (r RawAccessTokenPayloadClaims) GetIssuer() (string, error) {
-	return r.Iss, nil
-}
+	if r.Iat != 0 && now < r.Iat {
+		return fmt.Errorf("token used before issued")
+	}
 
-func (r RawAccessTokenPayloadClaims) GetSubject() (string, error) {
-	return r.Sub, nil
-}
-
-func (r RawAccessTokenPayloadClaims) GetAudience() (jwt.ClaimStrings, error) {
-	return jwt.ClaimStrings{r.Aud}, nil
+	return nil
 }

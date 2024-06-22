@@ -177,7 +177,7 @@ func (k KobbleUsers) ListAll(options *ListUsersOptions) (common.Pagination[User]
 	}
 
 	var result common.Pagination[User]
-	err := k.config.Http.GetJson("/users", map[string]string{
+	err := k.config.Http.GetJson("/users/list", map[string]string{
 		"page":            strconv.Itoa(page),
 		"limit":           strconv.Itoa(limit),
 		"includeMetadata": strconv.FormatBool(includeMetadata),
