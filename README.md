@@ -14,8 +14,12 @@
 Initialize a `Kobble` instance from a secret generated from your [Kobble dashboard](https://app.kobble.io/p/project/admin-sdk).
 
 ```go
+import (
+    "github.com/valensto/kobble-go-sdk/kobble"
+)
+
 func main() {
-    k := kobble.New("YOUR_SECRET", kobble.Options)
+    k := kobble.New("YOUR_SECRET", kobble.Options{})
     whoami, err := k.Whoami()
     if err != nil {
         log.Fatal(err)
@@ -33,8 +37,10 @@ func main() {
 You can verify **ID tokens** obtained using Kobble frontend SDKs as follows:
 
 ```go
+
+
 func main() {
-    k := kobble.New("YOUR_SECRET", kobble.Options)
+    k := kobble.New("YOUR_SECRET", kobble.Options{})
     result, err := k.Auth.VerifyIdToken("ID_TOKEN")
     if err != nil {
         log.Fatal(err)
