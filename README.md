@@ -1,4 +1,4 @@
-![Manage your Kobble project and users from your server with Kobble Admin SDK](https://firebasestorage.googleapis.com/v0/b/kobble-prod.appspot.com/o/docs%2Fbanners%2Fkobbleio-admin.png?alt=media&token=a6c10667-8619-4bdd-bb59-c91fa1ae5ed9)
+![Manage your Kobble project and users from your server with Kobble Admin SDK](https://firebasestorage.googleapis.com/v0/b/kobble-prod.appspot.com/o/docs%2Fbanners%2Fgo-admin-sdk-banner.png?alt=media&token=cbdac131-5718-456e-b9b4-92e95760b688)
 
 [![License](https://img.shields.io/:license-mit-blue.svg?style=flat)](https://opensource.org/licenses/MIT)
 ![Status](https://img.shields.io/:status-stable-green.svg?style=flat)
