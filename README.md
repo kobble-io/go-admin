@@ -7,9 +7,16 @@
 
 ## Project Status
 
-**This project is currently translated from TypeScript to Go, but it has not been tested yet and is a Work In Progress (WIP). Contributions and feedback are welcome to improve the stability and functionality of this SDK.**
+This project is not currently in **stable** status. We are actively working on fixing bugs and adding new features.
+Fill free to open an issue / open PR if you have any questions or need help.
 
 ## Getting started
+
+### Installation
+    
+```bash
+go get github.com/kobble-io/go-admin/kobble
+```
 
 Initialize a `Kobble` instance from a secret generated from your [Kobble dashboard](https://app.kobble.io/p/project/admin-sdk).
 
