@@ -33,6 +33,10 @@ func verifyES256Signature(data, signature []byte, key *ecdsa.PublicKey) bool {
 	return ecdsa.VerifyASN1(key, hash[:], signature)
 }
 
+// VerifyJwt verifies a JWT token string using the provided public key.
+//
+//	The options parameter allows you to specify which claims to verify.
+//	If the token is valid, the payload is returned as a map[string]any.
 func VerifyJwt(tokenString string, key *ecdsa.PublicKey, options VerifyJwtOptions) (map[string]any, error) {
 	ss := splitToken(tokenString)
 	if len(ss) != 3 {

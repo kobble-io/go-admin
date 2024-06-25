@@ -1,7 +1,7 @@
 package auth
 
 import (
-	"fmt"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/valensto/kobble-go-sdk/utils"
 )
 
@@ -12,10 +12,10 @@ import (
 type VerifyAccessTokenResult struct {
 	UserID    string                      `json:"user_id"`
 	ProjectID string                      `json:"project_id"`
-	Claims    RawAccessTokenPayloadClaims `json:"claims"`
+	Claims    rawAccessTokenPayloadClaims `json:"claims"`
 }
 
-type IdTokenUser struct {
+type idTokenUser struct {
 	ID         string `json:"id"`
 	Email      string `json:"email"`
 	Name       string `json:"name"`
@@ -28,8 +28,8 @@ type IdTokenUser struct {
 
 type VerifyIdTokenResult struct {
 	UserID string                  `json:"user_id"`
-	User   IdTokenUser             `json:"user"`
-	Claims RawIdTokenPayloadClaims `json:"claims"`
+	User   idTokenUser             `json:"user"`
+	Claims rawIdTokenPayloadClaims `json:"claims"`
 }
 
 type Config struct {
@@ -43,11 +43,11 @@ type Whoami struct {
 	UserId      string
 }
 
-type ProjectCache struct {
+type projectCache struct {
 	ProjectID string
 }
 
-type RawIdTokenPayloadClaims struct {
+type rawIdTokenPayloadClaims struct {
 	Sub        string `json:"sub"`
 	ID         string `json:"id"`
 	Email      string `json:"email"`
@@ -64,25 +64,31 @@ type RawIdTokenPayloadClaims struct {
 	Aud        string `json:"aud"`
 }
 
-func (r RawIdTokenPayloadClaims) Valid() error {
-	now := time.Now().Unix()
-
-	if r.Exp != 0 && now > r.Exp {
-		return fmt.Errorf("token is expired")
-	}
-
-	if r.Nbf != 0 && now < r.Nbf {
-		return fmt.Errorf("token is not valid yet")
-	}
-
-	if r.Iat != 0 && now < r.Iat {
-		return fmt.Errorf("token used before issued")
-	}
-
-	return nil
+func (r rawIdTokenPayloadClaims) GetExpirationTime() (*jwt.NumericDate, error) {
+	return jwt.NewNumericDate(time.Unix(r.Exp, 0)), nil
 }
 
-type RawAccessTokenPayloadClaims struct {
+func (r rawIdTokenPayloadClaims) GetIssuedAt() (*jwt.NumericDate, error) {
+	return jwt.NewNumericDate(time.Unix(r.Iat, 0)), nil
+}
+
+func (r rawIdTokenPayloadClaims) GetNotBefore() (*jwt.NumericDate, error) {
+	return jwt.NewNumericDate(time.Unix(r.Nbf, 0)), nil
+}
+
+func (r rawIdTokenPayloadClaims) GetIssuer() (string, error) {
+	return r.Iss, nil
+}
+
+func (r rawIdTokenPayloadClaims) GetSubject() (string, error) {
+	return r.Sub, nil
+}
+
+func (r rawIdTokenPayloadClaims) GetAudience() (jwt.ClaimStrings, error) {
+	return jwt.ClaimStrings{r.Aud}, nil
+}
+
+type rawAccessTokenPayloadClaims struct {
 	Sub       string `json:"sub"`
 	ProjectID string `json:"project_id"`
 	Exp       int64  `json:"exp"`
@@ -92,20 +98,26 @@ type RawAccessTokenPayloadClaims struct {
 	Aud       string `json:"aud"`
 }
 
-func (r RawAccessTokenPayloadClaims) Valid() error {
-	now := time.Now().Unix()
+func (r rawAccessTokenPayloadClaims) GetExpirationTime() (*jwt.NumericDate, error) {
+	return jwt.NewNumericDate(time.Unix(r.Exp, 0)), nil
+}
 
-	if r.Exp != 0 && now > r.Exp {
-		return fmt.Errorf("token is expired")
-	}
+func (r rawAccessTokenPayloadClaims) GetIssuedAt() (*jwt.NumericDate, error) {
+	return jwt.NewNumericDate(time.Unix(r.Iat, 0)), nil
+}
 
-	if r.Nbf != 0 && now < r.Nbf {
-		return fmt.Errorf("token is not valid yet")
-	}
+func (r rawAccessTokenPayloadClaims) GetNotBefore() (*jwt.NumericDate, error) {
+	return jwt.NewNumericDate(time.Unix(r.Nbf, 0)), nil
+}
 
-	if r.Iat != 0 && now < r.Iat {
-		return fmt.Errorf("token used before issued")
-	}
+func (r rawAccessTokenPayloadClaims) GetIssuer() (string, error) {
+	return r.Iss, nil
+}
 
-	return nil
+func (r rawAccessTokenPayloadClaims) GetSubject() (string, error) {
+	return r.Sub, nil
+}
+
+func (r rawAccessTokenPayloadClaims) GetAudience() (jwt.ClaimStrings, error) {
+	return jwt.ClaimStrings{r.Aud}, nil
 }

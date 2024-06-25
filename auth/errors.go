@@ -5,16 +5,16 @@ import (
 	"github.com/valensto/kobble-go-sdk/utils"
 )
 
-var ErrorNames = []string{
+var errorNames = []string{
 	"ID_TOKEN_VERIFICATION_FAILED",
 	"ACCESS_TOKEN_VERIFICATION_FAILED",
 	"UNAUTHENTICATED",
 }
 
-type ErrorName string
+type errorName string
 
-func isValidAuthErrorName(name ErrorName) bool {
-	for _, n := range ErrorNames {
+func isValidAuthErrorName(name errorName) bool {
+	for _, n := range errorNames {
 		if n == string(name) {
 			return true
 		}
@@ -22,21 +22,21 @@ func isValidAuthErrorName(name ErrorName) bool {
 	return false
 }
 
-type KobbleAuthError struct {
+type kobbleAuthError struct {
 	*utils.ErrorBase
 }
 
-func newKobbleAuthError(name ErrorName, message string, cause error) (*KobbleAuthError, error) {
+func newKobbleAuthError(name errorName, message string, cause error) (*kobbleAuthError, error) {
 	if !isValidAuthErrorName(name) {
 		return nil, fmt.Errorf("invalid AuthErrorName: %s", name)
 	}
-	return &KobbleAuthError{
+	return &kobbleAuthError{
 		ErrorBase: utils.NewErrorBase(string(name), message, cause),
 	}, nil
 }
 
-type IdTokenVerificationError struct {
-	*KobbleAuthError
+type idTokenVerificationError struct {
+	*kobbleAuthError
 }
 
 func newIdTokenVerificationError(cause error) error {
@@ -44,13 +44,13 @@ func newIdTokenVerificationError(cause error) error {
 	if errBaseErr != nil {
 		return errBaseErr
 	}
-	return IdTokenVerificationError{
-		KobbleAuthError: err,
+	return idTokenVerificationError{
+		kobbleAuthError: err,
 	}
 }
 
-type AccessTokenVerificationError struct {
-	*KobbleAuthError
+type accessTokenVerificationError struct {
+	*kobbleAuthError
 }
 
 func newAccessTokenVerificationError(cause error) error {
@@ -58,7 +58,7 @@ func newAccessTokenVerificationError(cause error) error {
 	if errBaseErr != nil {
 		return errBaseErr
 	}
-	return AccessTokenVerificationError{
-		KobbleAuthError: err,
+	return accessTokenVerificationError{
+		kobbleAuthError: err,
 	}
 }

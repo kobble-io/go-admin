@@ -87,21 +87,21 @@ type WebhookEvent struct {
 	Data any    `json:"data"`
 }
 
-type WebhookError struct {
+type webhookError struct {
 	Message string
 }
 
-func (e *WebhookError) Error() string {
+func (e *webhookError) Error() string {
 	return e.Message
 }
 
-type WebhookConstructEventError struct {
-	WebhookError
+type webhookConstructEventError struct {
+	webhookError
 }
 
-func NewWebhookConstructEventError(message string) *WebhookConstructEventError {
-	return &WebhookConstructEventError{
-		WebhookError: WebhookError{
+func newWebhookConstructEventError(message string) *webhookConstructEventError {
+	return &webhookConstructEventError{
+		webhookError: webhookError{
 			Message: message,
 		},
 	}

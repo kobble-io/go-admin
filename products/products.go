@@ -1,5 +1,6 @@
 package products
 
+// KobbleProducts is the struct that holds the configuration for the Product
 type KobbleProducts struct{}
 
 type Product struct {
