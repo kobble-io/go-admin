@@ -1,6 +1,6 @@
 package quotas
 
-import "github.com/valensto/kobble-go-sdk/utils"
+import "github.com/kobble-io/go-admin/utils"
 
 type Quotas struct {
 	ID    string `json:"id"`

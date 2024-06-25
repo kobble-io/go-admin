@@ -1,9 +1,9 @@
 package users
 
 import (
-	"github.com/valensto/kobble-go-sdk/common"
-	"github.com/valensto/kobble-go-sdk/permissions"
-	"github.com/valensto/kobble-go-sdk/utils"
+	"github.com/kobble-io/go-admin/common"
+	"github.com/kobble-io/go-admin/permissions"
+	"github.com/kobble-io/go-admin/utils"
 	"strconv"
 	"time"
 )

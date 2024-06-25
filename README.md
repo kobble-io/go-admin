@@ -15,7 +15,9 @@ Initialize a `Kobble` instance from a secret generated from your [Kobble dashboa
 
 ```go
 import (
-    "github.com/valensto/kobble-go-sdk/kobble"
+    "fmt"
+    "log"
+    "github.com/kobble-io/go-admin/kobble"
 )
 
 func main() {
@@ -37,8 +39,6 @@ func main() {
 You can verify **ID tokens** obtained using Kobble frontend SDKs as follows:
 
 ```go
-
-
 func main() {
     k := kobble.New("YOUR_SECRET", kobble.Options{})
     result, err := k.Auth.VerifyIdToken("ID_TOKEN")
@@ -100,7 +100,6 @@ Exported functions are extensively documented, and more documentation can be fou
 
 ## What is Kobble
 
-```html
 <p align="center">
   <picture>
     <img alt="Kobble Logo" src="https://firebasestorage.googleapis.com/v0/b/kobble-prod.appspot.com/o/docs%2Fbanners%2Flogo.png?alt=media&token=35c9e52e-6a90-4192-aa98-fe99c76be15a" width="150">
@@ -109,4 +108,3 @@ Exported functions are extensively documented, and more documentation can be fou
 <p align="center">
  Kobble is the one-stop solution for monetizing modern SaaS and APIs. It allows to add authentication, analytics and payment to any app in under 10 minutes.
 </p>
-```

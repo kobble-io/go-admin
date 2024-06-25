@@ -2,7 +2,7 @@ package auth
 
 import (
 	"fmt"
-	"github.com/valensto/kobble-go-sdk/utils"
+	"github.com/kobble-io/go-admin/utils"
 )
 
 var errorNames = []string{

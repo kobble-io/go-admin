@@ -1,4 +1,4 @@
-module github.com/valensto/kobble-go-sdk
+module github.com/kobble-io/go-admin
 
 go 1.22
 

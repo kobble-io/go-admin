@@ -1,11 +1,11 @@
 package kobble
 
 import (
-	"github.com/valensto/kobble-go-sdk/auth"
-	"github.com/valensto/kobble-go-sdk/gateway"
-	"github.com/valensto/kobble-go-sdk/users"
-	"github.com/valensto/kobble-go-sdk/utils"
-	"github.com/valensto/kobble-go-sdk/webhooks"
+	"github.com/kobble-io/go-admin/auth"
+	"github.com/kobble-io/go-admin/gateway"
+	"github.com/kobble-io/go-admin/users"
+	"github.com/kobble-io/go-admin/utils"
+	"github.com/kobble-io/go-admin/webhooks"
 )
 
 const DefaultBaseUrl = "https://sdk.kobble.io"

@@ -2,7 +2,7 @@ package auth
 
 import (
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/valensto/kobble-go-sdk/utils"
+	"github.com/kobble-io/go-admin/utils"
 )
 
 import (

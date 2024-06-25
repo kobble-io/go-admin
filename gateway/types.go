@@ -1,6 +1,6 @@
 package gateway
 
-import "github.com/valensto/kobble-go-sdk/utils"
+import "github.com/kobble-io/go-admin/utils"
 
 import (
 	"crypto/ecdsa"

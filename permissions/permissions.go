@@ -1,6 +1,6 @@
 package permissions
 
-import "github.com/valensto/kobble-go-sdk/utils"
+import "github.com/kobble-io/go-admin/utils"
 
 // KobblePermission is the struct that holds the configuration for the permission service
 type KobblePermission struct {

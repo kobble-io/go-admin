@@ -1,7 +1,7 @@
 package users
 
 import (
-	"github.com/valensto/kobble-go-sdk/utils"
+	"github.com/kobble-io/go-admin/utils"
 	"time"
 )
 
