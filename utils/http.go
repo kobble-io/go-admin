@@ -109,8 +109,6 @@ func (c *HttpClient) PostJson(path string, payload any, result any, expectedStat
 	}
 	defer resp.Body.Close()
 
-	fmt.Printf("expectedStatus code %d, got %d\n", expectedStatus, resp.StatusCode)
-
 	if resp.StatusCode != expectedStatus {
 		bodyBytes, _ := io.ReadAll(resp.Body)
 		return fmt.Errorf("error: %s", string(bodyBytes))
