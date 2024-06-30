@@ -14,12 +14,6 @@ type User struct {
 	Metadata   map[string]any `json:"metadata"`
 }
 
-type ListUsersOptions struct {
-	Limit           *int  `json:"limit,omitempty"`
-	Page            *int  `json:"page,omitempty"`
-	IncludeMetadata *bool `json:"include_metadata,omitempty"`
-}
-
 type UserActiveProduct struct {
 	Product
 }
@@ -79,10 +73,6 @@ type CreateUserPayload struct {
 	Metadata                  map[string]any `json:"metadata,omitempty"`
 	MarkEmailAsVerified       *bool          `json:"mark_email_as_verified,omitempty"`
 	MarkPhoneNumberAsVerified *bool          `json:"mark_phone_number_as_verified,omitempty"`
-}
-
-type GetUserOptions struct {
-	IncludeMetadata bool `json:"include_metadata,omitempty"`
 }
 
 type UrlLink struct {

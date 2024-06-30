@@ -71,11 +71,15 @@ func (k KobbleUsers) CreateLoginLink(userId string) (UrlLink, error) {
 // Note that the phone number should be in E.164 format (e.g. +14155552671). Other formats will be rejected.
 func (k KobbleUsers) Create(payload CreateUserPayload) (*User, error) {
 	var result ApiUser
-	err := k.config.Http.PostJson("/users", payload, &result)
+	err := k.config.Http.PostJson("/users/create", payload, &result)
 	if err != nil {
 		return nil, err
 	}
 	return k.transformApiUser(result), nil
+}
+
+type GetUserOptions struct {
+	IncludeMetadata bool `json:"include_metadata,omitempty"`
 }
 
 // GetById fetches a user by their ID.
@@ -136,18 +140,24 @@ func (k KobbleUsers) GetByPhoneNumber(phoneNumber string, options *GetUserOption
 	return k.transformApiUser(result), nil
 }
 
+type ListUsersOptions struct {
+	Limit           int  `json:"limit,omitempty"`
+	Page            int  `json:"page,omitempty"`
+	IncludeMetadata bool `json:"include_metadata,omitempty"`
+}
+
 // FindByMetadata fetches users by their metadata.
 //
 // You can also include the user's metadata in the response by setting the `IncludeMetadata` option to `true`.
 func (k KobbleUsers) FindByMetadata(metadata map[string]any, options *ListUsersOptions) (common.Pagination[User], error) {
 	page, limit := 1, 50
 	if options != nil {
-		if options.Page != nil {
-			page = *options.Page
+		if options.Page > page {
+			page = options.Page
 		}
 
-		if options.Limit != nil {
-			limit = *options.Limit
+		if options.Limit != limit && options.Limit > 0 {
+			limit = options.Limit
 		}
 	}
 
@@ -199,17 +209,15 @@ func (k KobbleUsers) UpdateMetadata(userId string, metadata map[string]any) (map
 func (k KobbleUsers) ListAll(options *ListUsersOptions) (common.Pagination[User], error) {
 	page, limit, includeMetadata := 1, 50, false
 	if options != nil {
-		if options.Page != nil {
-			page = *options.Page
+		if options.Page > page {
+			page = options.Page
 		}
 
-		if options.Limit != nil {
-			limit = *options.Limit
+		if options.Limit != limit && options.Limit > 0 {
+			limit = options.Limit
 		}
 
-		if options.IncludeMetadata != nil {
-			includeMetadata = *options.IncludeMetadata
-		}
+		includeMetadata = options.IncludeMetadata
 	}
 
 	var result common.Pagination[User]
@@ -265,14 +273,18 @@ func (k KobbleUsers) getCachedUserQuotas(userId string) *[]QuotaUsage {
 	return nil
 }
 
+type ListQuotasOptions struct {
+	NoCache bool
+}
+
 // ListQuotas retrieves the list of quota usages for a given user based on the product assigned to them.
 //
 //   - @param userId - The unique identifier for the user whose quota usage is being retrieved.
 //   - @param noCache - Set to true to bypass cache and fetch fresh data. Default is false.
 //   - @returns []QuotaUsage - An array of QuotaUsage objects, each representing a quota for the user.
-func (k KobbleUsers) ListQuotas(userId string, noCache *bool) ([]QuotaUsage, error) {
+func (k KobbleUsers) ListQuotas(userId string, opts *ListQuotasOptions) ([]QuotaUsage, error) {
 	quotas := k.getCachedUserQuotas(userId)
-	if noCache != nil && !*noCache {
+	if opts != nil && !opts.NoCache && quotas != nil {
 		return *quotas, nil
 	}
 
@@ -298,6 +310,10 @@ func (k KobbleUsers) ListQuotas(userId string, noCache *bool) ([]QuotaUsage, err
 	return quotasUsages, nil
 }
 
+type IncrementQuotaOptions struct {
+	IncrementBy int
+}
+
 // IncrementQuotaUsage asynchronously increments the quota usage for a specific user and quota.
 //
 //		This function allows incrementing a user's quota usage by a specified amount, which defaults to 1 if not provided.
@@ -305,12 +321,12 @@ func (k KobbleUsers) ListQuotas(userId string, noCache *bool) ([]QuotaUsage, err
 //	 - @param userId - The unique identifier for the user whose quota is being incremented.
 //	 - @param quotaName - The name of the quota to increment.
 //	 - @param incrementBy - The amount by which to increment the quota usage. Optional and defaults to 1.
-func (k KobbleUsers) IncrementQuotaUsage(userId string, quotaName string, incrementBy *int) error {
+func (k KobbleUsers) IncrementQuotaUsage(userId string, quotaName string, opts *IncrementQuotaOptions) error {
 	inc := 1
-	if incrementBy != nil {
-		inc = *incrementBy
+	if opts != nil {
+		inc = opts.IncrementBy
 	}
-	err := k.config.Http.PostJson("/users/incrementUsage", map[string]any{
+	err := k.config.Http.PostJson("/quotas/incrementUsage", map[string]any{
 		"userId":      userId,
 		"quotaName":   quotaName,
 		"incrementBy": inc,
@@ -322,6 +338,10 @@ func (k KobbleUsers) IncrementQuotaUsage(userId string, quotaName string, increm
 	return nil
 }
 
+type DecrementQuotaOptions struct {
+	DecrementBy int
+}
+
 // DecrementQuotaUsage asynchronously decrements the quota usage for a specific user and quota.
 //
 //		This function allows decrementing a user's quota usage by a specified amount, which defaults to 1 if not provided.
@@ -329,15 +349,21 @@ func (k KobbleUsers) IncrementQuotaUsage(userId string, quotaName string, increm
 //	 - @param userId - The unique identifier for the user whose quota is being decremented.
 //	 - @param quotaName - The name of the quota to decrement.
 //	 - @param decrementBy - The amount by which to decrement the quota usage. Optional and defaults to 1.
-func (k KobbleUsers) DecrementQuotaUsage(userId string, quotaName string, decrementBy *int) error {
+func (k KobbleUsers) DecrementQuotaUsage(userId string, quotaName string, opts *DecrementQuotaOptions) error {
 	dec := 1
-	if decrementBy != nil {
-		dec = *decrementBy
+	if opts != nil {
+		dec = opts.DecrementBy
 	}
-	err := k.config.Http.PostJson("/users/decrementUsage", map[string]any{
+
+	incrementBy := dec
+	if dec > 0 {
+		incrementBy = -dec
+	}
+
+	err := k.config.Http.PostJson("/quotas/incrementUsage", map[string]any{
 		"userId":      userId,
 		"quotaName":   quotaName,
-		"decrementBy": dec,
+		"incrementBy": incrementBy,
 	}, nil)
 	if err != nil {
 		return err
@@ -354,7 +380,7 @@ func (k KobbleUsers) DecrementQuotaUsage(userId string, quotaName string, decrem
 //	 - @param quotaName - The name of the quota to change.
 //	 - @param usage - The new usage you want to set.
 func (k KobbleUsers) SetQuotaUsage(userId string, quotaName string, usage int) error {
-	err := k.config.Http.PostJson("/users/setUsage", map[string]any{
+	err := k.config.Http.PostJson("/quotas/setUsage", map[string]any{
 		"userId":    userId,
 		"quotaName": quotaName,
 		"usage":     usage,
@@ -384,13 +410,17 @@ func (k KobbleUsers) GetQuotaUsage(userId string, quotaName string) (*QuotaUsage
 	return nil, nil
 }
 
+type ListPermissionsOptions struct {
+	NoCache bool
+}
+
 // ListPermissions retrieves the list of permissions for a given user based on the product assigned to them.
 //
 //   - @param userId - The unique identifier for the user whose permissions are being retrieved.
 //   - @param noCache - Set to true to bypass cache and fetch fresh data. Default is false.
-func (k KobbleUsers) ListPermissions(userId string, noCache *bool) ([]permissions.Permission, error) {
+func (k KobbleUsers) ListPermissions(userId string, opts *ListPermissionsOptions) ([]permissions.Permission, error) {
 	perms := k.getCachedUserPerms(userId)
-	if noCache != nil && !*noCache {
+	if opts != nil && !opts.NoCache && perms != nil {
 		return *perms, nil
 	}
 
@@ -405,13 +435,23 @@ func (k KobbleUsers) ListPermissions(userId string, noCache *bool) ([]permission
 	return result, nil
 }
 
+type HasRemainingQuotaOptions struct {
+	NoCache bool
+}
+
 // HasRemainingQuota checks if a user has remaining credit for all specified quota(s).
 //
 //   - @param userId - The unique identifier for the user whose quotas are being checked.
 //   - @param quotaNames - The names of the quotas to check. Can be a single name or an array of names.
 //   - @param noCache - Set to true to bypass cache and fetch fresh data. Default is false.
-func (k KobbleUsers) HasRemainingQuota(userId string, quotaNames []string, noCache *bool) (bool, error) {
-	quotas, err := k.ListQuotas(userId, noCache)
+func (k KobbleUsers) HasRemainingQuota(userId string, quotaNames []string, opts *HasRemainingQuotaOptions) (bool, error) {
+	var listQuotaOpts *ListQuotasOptions = nil
+	if opts != nil {
+		listQuotaOpts = &ListQuotasOptions{
+			NoCache: opts.NoCache,
+		}
+	}
+	quotas, err := k.ListQuotas(userId, listQuotaOpts)
 	if err != nil {
 		return false, err
 	}
@@ -427,13 +467,23 @@ func (k KobbleUsers) HasRemainingQuota(userId string, quotaNames []string, noCac
 	return false, nil
 }
 
+type HasPermissionOptions struct {
+	NoCache bool
+}
+
 // HasPermission checks if a user has all permissions specified as arguments.
 //
 //   - @param userId - The unique identifier for the user whose permissions are being checked.
 //   - @param permissionNames - The names of the permission(s) to check. Can be a single permission name or an array of names.
 //   - @param noCache - Set to true to bypass cache and fetch fresh data. Default is false.
-func (k KobbleUsers) HasPermission(userId string, permissionNames []string, noCache *bool) (bool, error) {
-	perms, err := k.ListPermissions(userId, noCache)
+func (k KobbleUsers) HasPermission(userId string, permissionNames []string, opts *HasPermissionOptions) (bool, error) {
+	var listPermissionOpts *ListPermissionsOptions = nil
+	if opts != nil {
+		listPermissionOpts = &ListPermissionsOptions{
+			NoCache: opts.NoCache,
+		}
+	}
+	perms, err := k.ListPermissions(userId, listPermissionOpts)
 	if err != nil {
 		return false, err
 	}
@@ -449,6 +499,10 @@ func (k KobbleUsers) HasPermission(userId string, permissionNames []string, noCa
 	return false, nil
 }
 
+type IsAllowedOptions struct {
+	NoCache bool
+}
+
 // IsAllowed this function is a helper to check if a user has all permissions and quotas specified in the payload.
 //
 //			If both permissionNames and quotaNames are provided, the user must have all permissions and quotas to be allowed.
@@ -460,14 +514,25 @@ func (k KobbleUsers) HasPermission(userId string, permissionNames []string, noCa
 //	 - @param payload.permissionNames - The names of the permissions to check.
 //	 - @param payload.quotaNames - The names of the quotas to check.
 //	 - @param noCache - Set to true to bypass cache and fetch fresh data. Default is false.
-func (k KobbleUsers) IsAllowed(userId string, payload IsAllowedPayload, noCache *bool) (bool, error) {
+func (k KobbleUsers) IsAllowed(userId string, payload IsAllowedPayload, opts *IsAllowedOptions) (bool, error) {
+	var hasPermissionOpts *HasPermissionOptions = nil
+	var hasRemainingQuotaOpts *HasRemainingQuotaOptions = nil
+	if opts != nil {
+		hasPermissionOpts = &HasPermissionOptions{
+			NoCache: opts.NoCache,
+		}
+		hasRemainingQuotaOpts = &HasRemainingQuotaOptions{
+			NoCache: opts.NoCache,
+		}
+	}
+
 	if len(payload.PermissionNames) > 0 && len(payload.QuotaNames) > 0 {
-		hasPermission, err := k.HasPermission(userId, payload.PermissionNames, noCache)
+		hasPermission, err := k.HasPermission(userId, payload.PermissionNames, hasPermissionOpts)
 		if err != nil {
 			return false, err
 		}
 
-		hasQuota, err := k.HasRemainingQuota(userId, payload.QuotaNames, noCache)
+		hasQuota, err := k.HasRemainingQuota(userId, payload.QuotaNames, hasRemainingQuotaOpts)
 		if err != nil {
 			return false, err
 		}
@@ -476,14 +541,18 @@ func (k KobbleUsers) IsAllowed(userId string, payload IsAllowedPayload, noCache 
 	}
 
 	if len(payload.PermissionNames) > 0 {
-		return k.HasPermission(userId, payload.PermissionNames, noCache)
+		return k.HasPermission(userId, payload.PermissionNames, hasPermissionOpts)
 	}
 
 	if len(payload.QuotaNames) > 0 {
-		return k.HasRemainingQuota(userId, payload.QuotaNames, noCache)
+		return k.HasRemainingQuota(userId, payload.QuotaNames, hasRemainingQuotaOpts)
 	}
 
 	return false, nil
+}
+
+type IsForbiddenOptions struct {
+	NoCache bool
 }
 
 // IsForbidden this function is a helper to check if a user is forbidden from performing an action.
@@ -495,8 +564,14 @@ func (k KobbleUsers) IsAllowed(userId string, payload IsAllowedPayload, noCache 
 //	 - @param payload.permissionNames - The names of the permissions to check.
 //	 - @param payload.quotaNames - The names of the quotas to check.
 //	 - @param noCache - Set to true to bypass cache and fetch fresh data. Default is false.
-func (k KobbleUsers) IsForbidden(userId string, payload IsAllowedPayload, noCache *bool) (bool, error) {
-	isAllowed, err := k.IsAllowed(userId, payload, noCache)
+func (k KobbleUsers) IsForbidden(userId string, payload IsAllowedPayload, opts *IsForbiddenOptions) (bool, error) {
+	var isAllowedOpts *IsAllowedOptions = nil
+	if opts != nil {
+		isAllowedOpts = &IsAllowedOptions{
+			NoCache: opts.NoCache,
+		}
+	}
+	isAllowed, err := k.IsAllowed(userId, payload, isAllowedOpts)
 	if err != nil {
 		return false, err
 	}
