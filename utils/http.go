@@ -50,7 +50,7 @@ func (c *HttpClient) makeURL(path string, params map[string]string) (string, err
 	return finalURL.String(), nil
 }
 
-func (c *HttpClient) GetJson(path string, params map[string]string, result any) error {
+func (c *HttpClient) GetJson(path string, params map[string]string, result any, expectedStatus int) error {
 	fullURL, err := c.makeURL(path, params)
 	if err != nil {
 		return err
@@ -71,7 +71,7 @@ func (c *HttpClient) GetJson(path string, params map[string]string, result any) 
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
+	if resp.StatusCode != expectedStatus {
 		bodyBytes, _ := ioutil.ReadAll(resp.Body)
 		return fmt.Errorf("error: %s", string(bodyBytes))
 	}
@@ -82,7 +82,7 @@ func (c *HttpClient) GetJson(path string, params map[string]string, result any) 
 	return json.NewDecoder(resp.Body).Decode(&result)
 }
 
-func (c *HttpClient) PostJson(path string, payload any, result any) error {
+func (c *HttpClient) PostJson(path string, payload any, result any, expectedStatus int) error {
 	fullURL, err := c.makeURL(path, nil)
 	if err != nil {
 		return err
@@ -109,7 +109,9 @@ func (c *HttpClient) PostJson(path string, payload any, result any) error {
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
+	fmt.Printf("expectedStatus code %d, got %d\n", expectedStatus, resp.StatusCode)
+
+	if resp.StatusCode != expectedStatus {
 		bodyBytes, _ := io.ReadAll(resp.Body)
 		return fmt.Errorf("error: %s", string(bodyBytes))
 	}

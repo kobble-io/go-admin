@@ -4,6 +4,7 @@ import (
 	"github.com/kobble-io/go-admin/common"
 	"github.com/kobble-io/go-admin/permissions"
 	"github.com/kobble-io/go-admin/utils"
+	"net/http"
 	"strconv"
 	"time"
 )
@@ -60,7 +61,7 @@ func (k KobbleUsers) CreateLoginLink(userId string) (UrlLink, error) {
 	var result UrlLink
 	err := k.config.Http.PostJson("/users/mintLoginLink", map[string]string{
 		"userId": userId,
-	}, &result)
+	}, &result, http.StatusCreated)
 	return result, err
 }
 
@@ -71,7 +72,7 @@ func (k KobbleUsers) CreateLoginLink(userId string) (UrlLink, error) {
 // Note that the phone number should be in E.164 format (e.g. +14155552671). Other formats will be rejected.
 func (k KobbleUsers) Create(payload CreateUserPayload) (*User, error) {
 	var result ApiUser
-	err := k.config.Http.PostJson("/users/create", payload, &result)
+	err := k.config.Http.PostJson("/users/create", payload, &result, http.StatusCreated)
 	if err != nil {
 		return nil, err
 	}
@@ -94,7 +95,7 @@ func (k KobbleUsers) GetById(userId string, options *GetUserOptions) (*User, err
 	err := k.config.Http.GetJson("/users/findById", map[string]string{
 		"userId":          userId,
 		"includeMetadata": strconv.FormatBool(includeMetadata),
-	}, &result)
+	}, &result, http.StatusOK)
 	if err != nil {
 		return nil, err
 	}
@@ -113,7 +114,7 @@ func (k KobbleUsers) GetByEmail(email string, options *GetUserOptions) (*User, e
 	err := k.config.Http.GetJson("/users/findByEmail", map[string]string{
 		"email":           email,
 		"includeMetadata": strconv.FormatBool(includeMetadata),
-	}, &result)
+	}, &result, http.StatusOK)
 	if err != nil {
 		return nil, err
 	}
@@ -133,7 +134,7 @@ func (k KobbleUsers) GetByPhoneNumber(phoneNumber string, options *GetUserOption
 	err := k.config.Http.GetJson("/users/findByPhoneNumber", map[string]string{
 		"phoneNumber":     phoneNumber,
 		"includeMetadata": strconv.FormatBool(includeMetadata),
-	}, &result)
+	}, &result, http.StatusOK)
 	if err != nil {
 		return nil, err
 	}
@@ -166,7 +167,7 @@ func (k KobbleUsers) FindByMetadata(metadata map[string]any, options *ListUsersO
 		"metadata": metadata,
 		"page":     page,
 		"limit":    limit,
-	}, &result)
+	}, &result, http.StatusOK)
 	if err != nil {
 		return common.Pagination[User]{}, err
 	}
@@ -179,7 +180,7 @@ func (k KobbleUsers) PatchMetadata(userId string, metadata map[string]any) (map[
 	err := k.config.Http.PostJson("/users/patchMetadata", map[string]any{
 		"userId":   userId,
 		"metadata": metadata,
-	}, nil)
+	}, nil, http.StatusCreated)
 	if err != nil {
 		return nil, err
 	}
@@ -192,7 +193,7 @@ func (k KobbleUsers) UpdateMetadata(userId string, metadata map[string]any) (map
 	err := k.config.Http.PostJson("/users/updateMetadata", map[string]any{
 		"userId":   userId,
 		"metadata": metadata,
-	}, nil)
+	}, nil, http.StatusCreated)
 	if err != nil {
 		return nil, err
 	}
@@ -225,7 +226,7 @@ func (k KobbleUsers) ListAll(options *ListUsersOptions) (common.Pagination[User]
 		"page":            strconv.Itoa(page),
 		"limit":           strconv.Itoa(limit),
 		"includeMetadata": strconv.FormatBool(includeMetadata),
-	}, &result)
+	}, &result, http.StatusOK)
 	if err != nil {
 		return common.Pagination[User]{}, err
 	}
@@ -241,7 +242,7 @@ func (k KobbleUsers) GetActiveProducts(userId string) (*UserActiveProduct, error
 	var result []UserActiveProduct
 	err := k.config.Http.GetJson("/users/listActiveProducts", map[string]string{
 		"userId": userId,
-	}, &result)
+	}, &result, http.StatusOK)
 	if err != nil {
 		return nil, err
 	}
@@ -291,7 +292,7 @@ func (k KobbleUsers) ListQuotas(userId string, opts *ListQuotasOptions) ([]Quota
 	var result ListApiQuotaResponse
 	err := k.config.Http.GetJson("/users/listQuotas", map[string]string{
 		"userId": userId,
-	}, &result)
+	}, &result, http.StatusOK)
 	if err != nil {
 		return nil, err
 	}
@@ -330,7 +331,7 @@ func (k KobbleUsers) IncrementQuotaUsage(userId string, quotaName string, opts *
 		"userId":      userId,
 		"quotaName":   quotaName,
 		"incrementBy": inc,
-	}, nil)
+	}, nil, http.StatusCreated)
 	if err != nil {
 		return err
 	}
@@ -364,7 +365,7 @@ func (k KobbleUsers) DecrementQuotaUsage(userId string, quotaName string, opts *
 		"userId":      userId,
 		"quotaName":   quotaName,
 		"incrementBy": incrementBy,
-	}, nil)
+	}, nil, http.StatusCreated)
 	if err != nil {
 		return err
 	}
@@ -384,7 +385,7 @@ func (k KobbleUsers) SetQuotaUsage(userId string, quotaName string, usage int) e
 		"userId":    userId,
 		"quotaName": quotaName,
 		"usage":     usage,
-	}, nil)
+	}, nil, http.StatusCreated)
 	if err != nil {
 		return err
 	}
@@ -427,7 +428,7 @@ func (k KobbleUsers) ListPermissions(userId string, opts *ListPermissionsOptions
 	var result []permissions.Permission
 	err := k.config.Http.GetJson("/users/listPermissions", map[string]string{
 		"userId": userId,
-	}, &result)
+	}, &result, http.StatusOK)
 	if err != nil {
 		return nil, err
 	}

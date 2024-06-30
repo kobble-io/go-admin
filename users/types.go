@@ -67,12 +67,12 @@ type ListApiPermissionResponse struct {
 }
 
 type CreateUserPayload struct {
-	Email                     *string        `json:"email,omitempty"`
-	Name                      *string        `json:"name,omitempty"`
-	PhoneNumber               *string        `json:"phone_number,omitempty"`
+	Email                     string         `json:"email,omitempty"`
+	Name                      string         `json:"name,omitempty"`
+	PhoneNumber               string         `json:"phone_number,omitempty"`
 	Metadata                  map[string]any `json:"metadata,omitempty"`
-	MarkEmailAsVerified       *bool          `json:"mark_email_as_verified,omitempty"`
-	MarkPhoneNumberAsVerified *bool          `json:"mark_phone_number_as_verified,omitempty"`
+	MarkEmailAsVerified       bool           `json:"mark_email_as_verified,omitempty"`
+	MarkPhoneNumberAsVerified bool           `json:"mark_phone_number_as_verified,omitempty"`
 }
 
 type UrlLink struct {

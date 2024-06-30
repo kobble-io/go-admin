@@ -5,6 +5,7 @@ import (
 	"github.com/MicahParks/keyfunc/v3"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/kobble-io/go-admin/utils"
+	"net/http"
 	"strings"
 	"time"
 )
@@ -33,7 +34,7 @@ func (auth KobbleAuth) getProjectId() (string, error) {
 	}
 
 	var whoami Whoami
-	err := auth.config.Http.GetJson("/auth/whoami", nil, &whoami)
+	err := auth.config.Http.GetJson("/auth/whoami", nil, &whoami, http.StatusOK)
 	if err != nil {
 		return "", err
 	}

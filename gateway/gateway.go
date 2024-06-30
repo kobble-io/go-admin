@@ -7,6 +7,7 @@ import (
 	"encoding/pem"
 	"errors"
 	"github.com/kobble-io/go-admin/utils"
+	"net/http"
 	"time"
 )
 
@@ -34,7 +35,7 @@ func (k *KobbleGateway) fetchKeyInfo() (*keyInfo, error) {
 		Pem       string `json:"pem"`
 		ProjectID string `json:"project_id"`
 	}
-	err := k.config.Http.GetJson("/gateway/getPublicKey", nil, &result)
+	err := k.config.Http.GetJson("/gateway/getPublicKey", nil, &result, http.StatusOK)
 	if err != nil {
 		return nil, err
 	}

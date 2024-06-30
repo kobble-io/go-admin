@@ -6,6 +6,7 @@ import (
 	"github.com/kobble-io/go-admin/users"
 	"github.com/kobble-io/go-admin/utils"
 	"github.com/kobble-io/go-admin/webhooks"
+	"net/http"
 )
 
 const DefaultBaseUrl = "https://sdk.kobble.io"
@@ -57,7 +58,7 @@ func New(secret string, options Options) *Kobble {
 // The user ID is the one of the user that created the secret.
 func (k Kobble) Whoami() (auth.Whoami, error) {
 	var whoami auth.Whoami
-	err := k.http.GetJson("/auth/whoami", nil, &whoami)
+	err := k.http.GetJson("/auth/whoami", nil, &whoami, http.StatusOK)
 	if err != nil {
 		return auth.Whoami{}, err
 	}
@@ -69,6 +70,6 @@ func (k Kobble) Whoami() (auth.Whoami, error) {
 //
 // Returns true if successful.
 func (k Kobble) Ping() bool {
-	err := k.http.GetJson("/ping", nil, nil)
+	err := k.http.GetJson("/ping", nil, nil, http.StatusOK)
 	return err == nil
 }
