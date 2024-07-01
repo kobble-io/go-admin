@@ -28,7 +28,7 @@ func (k *KobbleWebhooks) serializeBody(body any) ([]byte, error) {
 	}
 }
 
-// Construct a webhook event payload and verify its integrity.
+// ConstructEvent construct a webhook event payload and verify its integrity.
 // The `body` parameter is eventually serialized to a `Buffer` object in order to compute
 // the signature.
 // A `Buffer` can therefore be passed directly, but other types are accepted as well:
@@ -39,7 +39,7 @@ func (k *KobbleWebhooks) serializeBody(body any) ([]byte, error) {
 // The expected `signature` is the one sent in the webhook header `Kobble-Signature`.
 // The `secret` is the one associated with the webhook expected to receive the event.
 // The fully typesafe payload is returned if the signature is valid.
-func (k *KobbleWebhooks) constructEvent(body any, signature string, secret string) (WebhookEvent, error) {
+func (k *KobbleWebhooks) ConstructEvent(body any, signature string, secret string) (WebhookEvent, error) {
 	serializedBody, err := k.serializeBody(body)
 	if err != nil {
 		return WebhookEvent{}, err
